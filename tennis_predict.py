@@ -6,8 +6,6 @@ import tensorflow_hub as hub
 import numpy as np
 import pickle
 
-# 0.66 %80
-
 df = pd.read_csv('atp_matches_2020.csv',encoding="utf8")
 df["date"] = pd.to_datetime(df["tourney_date"],format="%Y%m%d")
 
@@ -19,17 +17,12 @@ date = pd.to_datetime("22082020",format="%d%m%Y")
 
 surface="Hard"              # Hard or Clay or Glass
 
-ev_sahibi = 111575
+home_id = 111575
 
-deplasman = 105526
+away_id = 105526
 
-op_id = ev_sahibi           # e.g 105018
-fav_id = deplasman
-
-
-#op_rank_point= 1395
-
-#fav_rank_point=1771
+op_id = home_id           # e.g 105018
+fav_id = away_id
 
 df_op = df[ (df["winner_id"] == op_id) | (df["loser_id"] == op_id)]
 
@@ -74,9 +67,8 @@ if (len(df_fav.index) > 0):
 if (fav_hand != 0 and fav_hand != 1):
     fav_hand == 1  # 1 for Right, 0 for Left
 
-print(op_rank_point,"!!!")
-
-print(fav_rank_point)
+#print(op_rank_point,"!!!")
+#print(fav_rank_point)
 
 datestart = date - pd.DateOffset(months=8)
 
@@ -103,20 +95,20 @@ try:
 except:
         op_ratio=0.5
 
-print(op_ratio)
-print(fav_ratio)
+#print(op_ratio)
+#print(fav_ratio)
 
+# Neural network
 model = tf.keras.models.load_model(
     ".\iamfortennis8.h5",
-    custom_objects = {"Keras Layer" : hub.KerasLayer}
-    )
-
+    custom_objects = {"Keras Layer" : hub.KerasLayer} )
 
 x = model.predict(np.array([[op_rank_point,op_hand,op_ratio,fav_rank_point,fav_hand,fav_ratio]]))
-print("\n",x[0][0])
+print("Neural Network:\n",x[0][0])
 
+# Linear Regression
 model = pickle.load(open("LRtennis8.sav", "rb"))
 x = model.predict(np.array([[op_rank_point,op_hand,op_ratio,fav_rank_point,fav_hand,fav_ratio]]))
-print(x[0])
+print("Linear Regression:\n",x[0])
 
 
